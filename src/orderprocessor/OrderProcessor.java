@@ -5,7 +5,10 @@
  */
 package orderprocessor;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  *
@@ -39,25 +42,27 @@ public class OrderProcessor {
     }
     /**
      * 
+     * @param inFile
+     * @param outFile 
      */
-    public void openFiles(){
+    public void openFiles(File inFile, File outFile){
+        try{
+            BufferedReader in = new BufferedReader((new FileReader(inFile)));    
+            BufferedReader out = new BufferedReader((new FileReader(outFile))); 
+        }
+        catch(IOException e){
+            System.out.println("File read failed D:");
+        }
+    }
+
+    public void closeFiles(File inFile, File outFile){
         
     }
-    /**
-     * 
-     */
-    public void closeFiles(){
-        
+
+    public void readOrders(File inFile, File outFile){
+        inFile.
     }
-    /**
-     * 
-     */
-    public void readOrders(){
-        
-    }
-    /**
-     * 
-     */
+
     public void write(){
         
     }
