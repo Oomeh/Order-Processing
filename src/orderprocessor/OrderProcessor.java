@@ -18,85 +18,147 @@ import java.io.PrintWriter;
  * @author bvance
  */
 public class OrderProcessor {
+
+    /**
+     * @param args the command line arguments
+     */        
     
-    int OrderID;
-    int PartNum;
-    static File inputFile;
-    static File outputFile;
-    static BufferedReader in;
     /**
-     * 
-     * @param input
-     * @param output 
+     * Fields
      */
-    public OrderProcessor(File input, File output) {
-        openFiles(input, output);
-        readOrders(in);
-    }
+        static String order;
+        static String orderID;
+        static String partNum;
+        static double price;
+        static int quantity;
+        static final double TAX_RATE = 0.02;
+        static final double SHIPPING_RATE = 0.07;        
+        static float total;
+        static File inFile;
+        static File outFile;
+        static BufferedReader reader;
+        static PrintWriter writer;       
+        static String[] splitter;
+        static double tax;
+        static double shipping;
+
     /**
-     * 
+     * Constructor that has the file locations hard coded
      */
     public OrderProcessor() {
-        inputFile = new File("/Volumes/Shared Files/Orders.txt");
-        outputFile = new File("OrdersProcessed.txt");
-        
+        inFile = new File("/Volumes/Shared Files/Orders.txt");
+        outFile = new File("OrdersProcessed.txt");       
     }
     
-    
+    /**
+     * Accepts parameters for the files to open
+     * @param in
+     * @param out 
+     */
+    public OrderProcessor(File in, File out){
+        inFile = in;
+        outFile = out;
+    }
+     
     
     /**
      * @param args the command line arguments
      */
+    
     public static void main(String[] args) {
-
-        openFiles(inputFile, outputFile);
-        readOrders(in);
+        OrderProcessor orderprocessor = new OrderProcessor();
+        openFiles();
+        readFile();
+        closeFiles();
     }
+    
     /**
-     * 
-     * @param inFile
-     * @param outFile 
+     * Opens the files for reading and writing.
      */
-    public static void openFiles(File inFile, File outFile){
+    public static void openFiles(){
         try{
-            in = new BufferedReader((new FileReader(inFile)));    
-            PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(outFile)));
+            reader = new BufferedReader((new FileReader(inFile)));            
+            writer = new PrintWriter(new BufferedWriter(new FileWriter(outFile)));
         }
         catch(IOException e){
-            System.out.println("File open failed >:");
+            System.out.println("File open failed");
         }
     }
+    
+    /**
+     * Reads the opened file and calls the writeFile and calculate methods .
+     */
+    public static void readFile(){
+        try{       
+            System.out.println("Start processing orders");
+            reader.readLine();
+            order = reader.readLine();
+            while(order != null && order.isEmpty() == false){
+                writeFile();
 
-    public static void closeFiles(BufferedReader inFile, PrintWriter outFile){
-        try{
-            inFile.close();
-            outFile.close();
+                order = reader.readLine();
+            }
         }
         catch(IOException e)
         {
-            System.out.println("File close failed D:");
+            System.out.println("File read failed");
         }
-
-    }
-
-    public static void readOrders(BufferedReader inFile){
+    }   
+    
+    /**
+     * Closes the opened files.
+     */
+    public static void closeFiles(){
         try{
-            inFile.readLine();
-        
+            reader.close();
+            writer.close(); 
         }
-        catch(IOException e)
-        {
-            System.out.println("File read failed T~T");
-        }
+        catch(IOException e){
+            System.out.println("File close failed");
+        } 
+        //End of processing
+        System.out.println("Finished processing orders");     
     }
+    
+    /**
+     * Splits up and writes the information read from the file into another file
+     * and calls the calculate method to finish writing the pricing information.
+     */
+    public static void writeFile(){
+        splitter = order.split("\\|");
+        for(int i = 0; i < splitter.length; i++){
+            switch(i){
+                case 0: orderID = splitter[i];
+                        writer.println("Order ID:   " + orderID);
+                        break;
+                case 1: partNum = splitter[i];
+                        writer.println("Part Num:   " + partNum);
+                        break;
+                case 2: price = Double.parseDouble(splitter[i]);
+                        writer.println("Price:      " + price);
+                            break;
+                case 3: quantity = Integer.parseInt(splitter[i]);
+                        writer.println("Quantity:   " + quantity);
+                        break;
+                default: break;
+                
+            }
+        }
+        calculate();
+        writer.println("Tax:        " + tax );                    
+        writer.println("Shipping:   " + shipping);                
+        writer.println("Total:      " + (price + tax + shipping));
+        writer.println();
+    }    
+    
+    /**
+     * Calculates the price of shipping, tax, and the total and adds it to the file.
+     */
+    public static void calculate(){
 
-    public void write(PrintWriter outFile){
-        outFile.println("Order ID:");
-        outFile.println("Part Num:");
-        outFile.println("Price:");
-        outFile.println("Quantity:");
-        outFile.println("Tax:");
-        outFile.println("Shipping:");
-        outFile.println("Total:");
+        double product = price * quantity; 
+        tax = product * TAX_RATE;
+        shipping = product * SHIPPING_RATE; 
     }
 }
+
